@@ -200,7 +200,16 @@ namespace socks5.Socks
 		public static int Receive(Client client, out byte[] buffer)
 		{
 			buffer = new byte[65535];
-			return client.Receive(buffer, 0, buffer.Length);
+			
+			// socks5 控制协议至少4个字符，这里没有判断获取到的内容够不够
+			int len = client.Receive(buffer, 0, buffer.Length);
+			if (len < 4)
+			{
+                int len2 = client.Receive(buffer, len, buffer.Length - len);
+                len += len2;
+			}
+
+			return len;
 		}
 	}
 
